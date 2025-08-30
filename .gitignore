@@ -1,0 +1,29 @@
+# Build artifacts
+/build/
+*.o
+*.obj
+*.pdb
+*.ipch
+*.ilk
+*.exe
+*.dll
+*.so
+*.dylib
+*.a
+*.lib
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake-build-*/
+Makefile
+install_manifest.txt
+compile_commands.json
+
+# IDE
+.vscode/
+.idea/
+*.user
+*.code-workspace
+
+
