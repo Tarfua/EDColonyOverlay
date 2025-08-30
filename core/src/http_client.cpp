@@ -11,6 +11,8 @@
 #include <charconv>
 #include <random>
 #include <asio/steady_timer.hpp>
+#include <thread>
+#include <chrono>
 
 using asio::awaitable;
 using asio::co_spawn;
@@ -43,6 +45,7 @@ HttpClient::HttpClient(asio::io_context& io, std::string base_uri, std::string u
 awaitable<std::string> HttpClient::httpGet(const std::string& path, int timeout_ms, int retries) {
     std::minstd_rand rng{static_cast<unsigned int>(std::random_device{}())};
     std::uniform_int_distribution<int> jitter(50, 200);
+    (void)timeout_ms; // TODO: wire into connect/read timeouts
     for (int attempt = 0; attempt <= retries; ++attempt) {
         try {
             tcp::resolver resolver(io_context_);
@@ -103,9 +106,7 @@ awaitable<std::string> HttpClient::httpGet(const std::string& path, int timeout_
             co_return body;
         } catch (...) {
             if (attempt == retries) break;
-            asio::steady_timer t(io_context_);
-            t.expires_after(std::chrono::milliseconds(jitter(rng)));
-            co_await t.async_wait(use_awaitable);
+            std::this_thread::sleep_for(std::chrono::milliseconds(jitter(rng)));
         }
     }
     co_return std::string{};
