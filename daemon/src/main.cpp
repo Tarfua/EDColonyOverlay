@@ -13,6 +13,7 @@
 #include "edcolony/net/sync.hpp"
 #include "edcolony/http_client.hpp"
 #include "edcolony/persistence.hpp"
+#include <memory>
 #include <csignal>
 #include <filesystem>
 
@@ -22,6 +23,8 @@ int main() {
     std::cout << "svc_uri=" << cfg.service_uri << "\n";
     std::cout << "journal_dir=" << cfg.journal_dir << "\n";
     if (!cfg.cmdr.empty()) std::cout << "cmdr=" << cfg.cmdr << "\n";
+    if (cfg.service_uri.empty()) std::cout << "network=offline (EDCOLONY_SVC_URI not set)\n";
+    else std::cout << "network=enabled -> " << cfg.service_uri << "\n";
 
     // open SQLite cache under XDG state dir, ensure dirs exist
     std::string db_path;
@@ -52,13 +55,17 @@ int main() {
 
     asio::io_context io;
     asio::steady_timer debounce_timer(io);
-    edcolony::HttpClient http(io, cfg.service_uri.empty() ? std::string("http://localhost:8080") : cfg.service_uri,
-                               std::string("EDColonyDaemon/0.1"));
+    const bool net_enabled = !cfg.service_uri.empty();
+    std::unique_ptr<edcolony::HttpClient> http;
+    if (net_enabled) {
+        http = std::make_unique<edcolony::HttpClient>(io, cfg.service_uri, std::string("EDColonyDaemon/0.1"));
+    }
     auto schedule_debounce = [&](int ms){
         debounce_timer.expires_after(std::chrono::milliseconds(ms));
         debounce_timer.async_wait([&](const std::error_code&){
+            if (!net_enabled || !http) return;
             std::string cmdr = cfg.cmdr.empty() ? std::string("CMDR") : cfg.cmdr;
-            asio::co_spawn(io, edcolony::syncCmdrSnapshot(http, storage, state, cmdr), asio::detached);
+            asio::co_spawn(io, edcolony::syncCmdrSnapshot(*http, storage, state, cmdr), asio::detached);
         });
     };
     edcolony::JournalTailer tailer(cfg.journal_dir, [&](const edcolony::JournalEvent& ev){

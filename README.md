@@ -31,6 +31,8 @@ cmake --build build --target package
 Запуск демона:
 ```bash
 EDCOLONY_CMDR="Your CMDR" EDCOLONY_SVC_URI="http://localhost:8080" ./build/daemon/edcolony_daemon
+# або офлайн (без мережі):
+./build/daemon/edcolony_daemon
 ```
 
 Конфіг через змінні середовища (за замовчуванням порожні):
