@@ -10,6 +10,10 @@ namespace fs = std::filesystem;
 
 namespace edcolony {
 
+JournalTailer::~JournalTailer() {
+    stop();
+}
+
 static bool isJournalFile(const fs::path& p) {
     const auto name = p.filename().string();
     return name.rfind("Journal.", 0) == 0 && p.extension() == ".log";

@@ -33,6 +33,7 @@ class JournalTailer {
 public:
     explicit JournalTailer(std::string directory, JournalCallback cb)
         : directory_(std::move(directory)), callback_(std::move(cb)) {}
+    ~JournalTailer();
 
     void start();
     void stop();

@@ -11,6 +11,8 @@
 #include <asio/detached.hpp>
 #include "edcolony/net/sync.hpp"
 #include "edcolony/http_client.hpp"
+#include <csignal>
+#include <filesystem>
 
 int main() {
     auto cfg = edcolony::loadConfigFromEnv();
@@ -18,10 +20,16 @@ int main() {
     std::cout << "svc_uri=" << cfg.service_uri << "\n";
     std::cout << "journal_dir=" << cfg.journal_dir << "\n";
 
-    // open SQLite cache under XDG cache dir
+    // open SQLite cache under XDG state dir, ensure dirs exist
     std::string db_path;
     if (const char* xdg = std::getenv("XDG_STATE_HOME")) db_path = std::string(xdg) + "/edcolony/state.db";
     else if (const char* home = std::getenv("HOME")) db_path = std::string(home) + "/.local/state/edcolony/state.db";
+    if (!db_path.empty()) {
+        namespace fs = std::filesystem;
+        fs::path p(db_path);
+        std::error_code ec;
+        fs::create_directories(p.parent_path(), ec);
+    }
     edcolony::Storage storage;
     if (!db_path.empty()) {
         // naive: create dirs if missing is omitted for brevity
@@ -69,9 +77,16 @@ int main() {
         }
     });
     tailer.start();
+    // signal handling for graceful stop
+    std::atomic<bool> running {true};
+    std::signal(SIGINT, [](int){ /* noop for now */ });
+    std::signal(SIGTERM, [](int){ /* noop for now */ });
     // Run event loop
     std::cout << "tailing journals... press Ctrl+C to exit" << std::endl;
-    io.run();
+    for (;;) {
+        io.poll();
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    }
     std::cout << "OK\n";
     return 0;
 }

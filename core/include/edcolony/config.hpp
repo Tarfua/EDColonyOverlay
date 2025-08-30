@@ -3,6 +3,7 @@
 #include <string>
 #include <cstdlib>
 #include <filesystem>
+#include <vector>
 
 namespace edcolony {
 
