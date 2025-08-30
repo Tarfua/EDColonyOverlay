@@ -9,6 +9,10 @@
 - GCC >= 12 або Clang >= 15
 - Linux x86_64
 
+Залежності (встановіть системні, решта підтягнеться FetchContent):
+- Ubuntu/Debian:
+  - `sudo apt-get update && sudo apt-get install -y build-essential cmake pkg-config sqlite3 libsqlite3-dev`
+
 Команди:
 
 ```bash

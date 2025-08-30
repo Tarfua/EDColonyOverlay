@@ -10,6 +10,7 @@ add_library(edcolony_core
 target_include_directories(edcolony_core
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/include
+        ${asio_SOURCE_DIR}/asio/include
 )
 
 target_link_libraries(edcolony_core
