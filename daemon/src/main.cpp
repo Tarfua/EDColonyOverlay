@@ -9,6 +9,7 @@
 #include <asio/steady_timer.hpp>
 #include <asio/co_spawn.hpp>
 #include <asio/detached.hpp>
+#include <asio/signal_set.hpp>
 #include "edcolony/net/sync.hpp"
 #include "edcolony/http_client.hpp"
 #include "edcolony/persistence.hpp"
@@ -89,16 +90,17 @@ int main() {
         }
     });
     tailer.start();
-    // signal handling for graceful stop
-    std::atomic<bool> running {true};
-    std::signal(SIGINT, [](int){ /* noop for now */ });
-    std::signal(SIGTERM, [](int){ /* noop for now */ });
+    // Keep io alive
+    auto work_guard = asio::make_work_guard(io);
+    // signal handling for graceful stop (user unit friendly)
+    asio::signal_set signals(io, SIGINT, SIGTERM);
+    signals.async_wait([&](const std::error_code&, int){
+        tailer.stop();
+        work_guard.reset();
+    });
     // Run event loop
     std::cout << "tailing journals... press Ctrl+C to exit" << std::endl;
-    for (;;) {
-        io.poll();
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
-    }
+    io.run();
     std::cout << "OK\n";
     return 0;
 }

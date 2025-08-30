@@ -18,6 +18,8 @@
 ```bash
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j
+./install.sh
+systemctl --user enable --now edcolony-daemon.service
 ```
 
 Запуск демона:
@@ -28,6 +30,7 @@ EDCOLONY_CMDR="Your CMDR" EDCOLONY_SVC_URI="http://localhost:8080" ./build/daemo
 Конфіг через змінні середовища (за замовчуванням порожні):
 - EDCOLONY_SVC_URI — базовий URL бекенда колонізації
 - EDCOLONY_JOURNAL_DIR — каталог журналів Elite Dangerous (у Proton-префіксі)
+- EDCOLONY_CMDR — ім'я CMDR для синхронізації
 
 ## Структура
 - core/ — доменні моделі й базова логіка (C++20, без зовн. залежностей)
