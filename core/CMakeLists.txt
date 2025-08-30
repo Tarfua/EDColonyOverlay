@@ -2,6 +2,7 @@ add_library(edcolony_core
     src/dummy.cpp
     src/journal.cpp
     src/http_client.cpp
+    src/storage.cpp
 )
 
 target_include_directories(edcolony_core
@@ -13,6 +14,7 @@ target_link_libraries(edcolony_core
     PUBLIC
         nlohmann_json::nlohmann_json
         Threads::Threads
+        SQLite::SQLite3
 )
 
 target_compile_features(edcolony_core PUBLIC cxx_std_20)

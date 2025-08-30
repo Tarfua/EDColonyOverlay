@@ -40,6 +40,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(spdlog)
 
 find_package(Threads REQUIRED)
+find_package(SQLite3 REQUIRED)
 
 if(MSVC)
     add_compile_options(/W4)

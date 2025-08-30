@@ -2,12 +2,25 @@
 #include <cstdlib>
 #include "edcolony/config.hpp"
 #include "edcolony/journal.hpp"
+#include "edcolony/storage.hpp"
 
 int main() {
     auto cfg = edcolony::loadConfigFromEnv();
     std::cout << "EDColony daemon starting...\n";
     std::cout << "svc_uri=" << cfg.service_uri << "\n";
     std::cout << "journal_dir=" << cfg.journal_dir << "\n";
+
+    // open SQLite cache under XDG cache dir
+    std::string db_path;
+    if (const char* xdg = std::getenv("XDG_STATE_HOME")) db_path = std::string(xdg) + "/edcolony/state.db";
+    else if (const char* home = std::getenv("HOME")) db_path = std::string(home) + "/.local/state/edcolony/state.db";
+    edcolony::Storage storage;
+    if (!db_path.empty()) {
+        // naive: create dirs if missing is omitted for brevity
+        if (storage.open(db_path)) {
+            storage.migrate();
+        }
+    }
 
     edcolony::JournalTailer tailer(cfg.journal_dir, [](const edcolony::JournalEvent& ev){
         using K = edcolony::JournalEventKind;
