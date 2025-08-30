@@ -32,8 +32,11 @@ void handleMarket(const nlohmann::json& ev, ColonyState& state) {
     long long marketId = ev.value("MarketID", 0);
     std::cout << "[handleMarket] MarketID=" << marketId << "\n";
     auto it = state.fcByMarketId.find(marketId);
-    if (it == state.fcByMarketId.end()) return;
-    auto& fc = it->second;
+    if (it == state.fcByMarketId.end()) {
+        // ensure FC entry exists so that later sync can merge
+        state.fcByMarketId[marketId] = FleetCarrier{.market_id = marketId};
+    }
+    auto& fc = state.fcByMarketId[marketId];
     if (ev.contains("Items") && ev["Items"].is_array()) {
         for (const auto& item : ev["Items"]) {
             std::string name = item.value("Name", std::string());
