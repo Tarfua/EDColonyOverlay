@@ -1,29 +1,21 @@
 # Build artifacts
 /build/
-*.o
-*.obj
-*.pdb
-*.ipch
-*.ilk
-*.exe
-*.dll
-*.so
-*.dylib
-*.a
-*.lib
-
-# CMake
-CMakeCache.txt
 CMakeFiles/
-cmake-build-*/
-Makefile
-install_manifest.txt
+CMakeCache.txt
+*.o
+*.a
+*.so
+*.dll
+*.dylib
+*.pdb
 compile_commands.json
 
 # IDE
-.vscode/
-.idea/
-*.user
-*.code-workspace
+/.idea/
+/.vscode/
+
+# Misc
+*.log
+*.tmp
 
 
