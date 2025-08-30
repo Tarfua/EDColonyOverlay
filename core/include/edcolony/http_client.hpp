@@ -21,6 +21,9 @@ public:
     // GET /api/cmdr/{cmdr}/fc/all
     asio::awaitable<std::string> getAllCmdrFCs(const std::string& cmdr);
 
+    // POST /api/project/{buildId} (update)
+    asio::awaitable<int> postProjectUpdate(const std::string& build_id, const std::string& json_body);
+
 private:
     asio::io_context& io_context_;
     std::string base_uri_;
