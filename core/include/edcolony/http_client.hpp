@@ -28,7 +28,8 @@ private:
     std::string host_;
     std::string port_;
     std::string api_prefix_ {"/api"};
-    asio::awaitable<std::string> httpGet(const std::string& path, int timeout_ms = 5000);
+    std::string etag_;
+    asio::awaitable<std::string> httpGet(const std::string& path, int timeout_ms = 5000, int retries = 2);
 };
 
 }
