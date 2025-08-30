@@ -20,6 +20,12 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j
 ./install.sh
 systemctl --user enable --now edcolony-daemon.service
+
+Пакування (для користувачів):
+```bash
+cmake --build build --target package
+# Отримаєте edcolony-daemon-<version>-Linux.deb та .tar.gz у build/
+```
 ```
 
 Запуск демона:

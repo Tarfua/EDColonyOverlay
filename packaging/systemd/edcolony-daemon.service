@@ -1,0 +1,14 @@
+[Unit]
+Description=EDColony Daemon
+After=network-online.target
+
+[Service]
+Environment=EDCOLONY_JOURNAL_DIR=
+Environment=EDCOLONY_SVC_URI=
+Environment=EDCOLONY_CMDR=
+ExecStart=%h/.local/bin/edcolony_daemon
+Restart=on-failure
+
+[Install]
+WantedBy=default.target
+
