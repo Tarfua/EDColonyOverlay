@@ -2,6 +2,8 @@
 
 #include <sqlite3.h>
 #include <string>
+#include <vector>
+#include "edcolony/models.hpp"
 
 namespace edcolony {
 
@@ -25,6 +27,10 @@ public:
     // Fleet carrier
     bool upsertFleetCarrierJson(long long market_id, const std::string& json);
     bool getFleetCarrierJson(long long market_id, std::string& json_out);
+
+    // Bulk loads (parse JSON -> models)
+    bool loadAllProjects(std::vector<Project>& out);
+    bool loadAllFleetCarriers(std::vector<FleetCarrier>& out);
 
 private:
     sqlite3* db_ {nullptr};

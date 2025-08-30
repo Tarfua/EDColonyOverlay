@@ -2,6 +2,8 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <nlohmann/json.hpp>
+#include "edcolony/json.hpp"
 
 namespace edcolony {
 
@@ -159,6 +161,44 @@ bool Storage::getFleetCarrierJson(long long market_id, std::string& json_out) {
     }
     sqlite3_finalize(stmt);
     return ok;
+}
+
+bool Storage::loadAllProjects(std::vector<Project>& out) {
+    if (!db_) return false;
+    sqlite3_stmt* stmt = nullptr;
+    if (sqlite3_prepare_v2(db_, "SELECT json FROM projects;", -1, &stmt, nullptr) != SQLITE_OK) return false;
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        const unsigned char* txt = sqlite3_column_text(stmt, 0);
+        if (txt) {
+            try {
+                nlohmann::json j = nlohmann::json::parse(reinterpret_cast<const char*>(txt));
+                Project p = j.get<Project>();
+                out.push_back(std::move(p));
+            } catch (...) {
+            }
+        }
+    }
+    sqlite3_finalize(stmt);
+    return true;
+}
+
+bool Storage::loadAllFleetCarriers(std::vector<FleetCarrier>& out) {
+    if (!db_) return false;
+    sqlite3_stmt* stmt = nullptr;
+    if (sqlite3_prepare_v2(db_, "SELECT json FROM fleet_carriers;", -1, &stmt, nullptr) != SQLITE_OK) return false;
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        const unsigned char* txt = sqlite3_column_text(stmt, 0);
+        if (txt) {
+            try {
+                nlohmann::json j = nlohmann::json::parse(reinterpret_cast<const char*>(txt));
+                FleetCarrier fc = j.get<FleetCarrier>();
+                out.push_back(std::move(fc));
+            } catch (...) {
+            }
+        }
+    }
+    sqlite3_finalize(stmt);
+    return true;
 }
 
 }

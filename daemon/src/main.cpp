@@ -5,6 +5,8 @@
 #include "edcolony/storage.hpp"
 #include "edcolony/handlers.hpp"
 #include "edcolony/state.hpp"
+#include <asio/io_context.hpp>
+#include <asio/steady_timer.hpp>
 
 int main() {
     auto cfg = edcolony::loadConfigFromEnv();
@@ -25,28 +27,45 @@ int main() {
     }
 
     edcolony::ColonyState state;
-    edcolony::JournalTailer tailer(cfg.journal_dir, [&state](const edcolony::JournalEvent& ev){
+    // load startup snapshot from cache
+    std::vector<edcolony::Project> cachedProjects;
+    std::vector<edcolony::FleetCarrier> cachedFCs;
+    storage.loadAllProjects(cachedProjects);
+    storage.loadAllFleetCarriers(cachedFCs);
+    for (const auto& p : cachedProjects) state.projectsById[p.build_id] = p;
+    for (const auto& fc : cachedFCs) state.fcByMarketId[fc.market_id] = fc;
+
+    asio::io_context io;
+    asio::steady_timer debounce_timer(io);
+    auto schedule_debounce = [&](int ms){
+        debounce_timer.expires_after(std::chrono::milliseconds(ms));
+        debounce_timer.async_wait([&](const std::error_code&){
+            // TODO: fire network sync here
+        });
+    };
+    edcolony::JournalTailer tailer(cfg.journal_dir, [&](const edcolony::JournalEvent& ev){
         using K = edcolony::JournalEventKind;
         switch (ev.kind) {
             case K::Docked:
                 edcolony::handleDocked(ev.payload, state);
+                schedule_debounce(400);
                 break;
             case K::ColonisationConstructionDepot:
                 edcolony::handleDepot(ev.payload, state);
+                schedule_debounce(400);
                 break;
             case K::Market:
                 edcolony::handleMarket(ev.payload, state);
+                schedule_debounce(400);
                 break;
             default:
                 break;
         }
     });
     tailer.start();
-    // Keep process alive until SIGINT (simplest loop for now)
+    // Run event loop
     std::cout << "tailing journals... press Ctrl+C to exit" << std::endl;
-    for (;;) {
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-    }
+    io.run();
     std::cout << "OK\n";
     return 0;
 }
