@@ -4,6 +4,8 @@
 #include <functional>
 #include <vector>
 #include <memory>
+#include <thread>
+#include <atomic>
 
 namespace edcolony {
 
@@ -36,6 +38,10 @@ public:
 private:
     std::string directory_;
     JournalCallback callback_;
+    std::atomic<bool> running_ {false};
+    std::thread worker_;
+    std::string active_file_;
+    std::string read_buffer_;
 };
 
 }

@@ -15,11 +15,17 @@ public:
         : io_context_(io), user_agent_(std::move(user_agent)) {}
 
     // GET /api/cmdr/{cmdr}/active
-    asio::awaitable<std::string> getCmdrActive(const std::string& cmdr);
+    asio::awaitable<std::string> getCmdrActive(const std::string& cmdr) {
+        co_return std::string{}; // stub
+    }
     // GET /api/cmdr/{cmdr}/primary
-    asio::awaitable<std::string> getPrimary(const std::string& cmdr);
+    asio::awaitable<std::string> getPrimary(const std::string& cmdr) {
+        co_return std::string{}; // stub
+    }
     // GET /api/cmdr/{cmdr}/fc/all
-    asio::awaitable<std::string> getAllCmdrFCs(const std::string& cmdr);
+    asio::awaitable<std::string> getAllCmdrFCs(const std::string& cmdr) {
+        co_return std::string{}; // stub
+    }
 
 private:
     asio::io_context& io_context_;

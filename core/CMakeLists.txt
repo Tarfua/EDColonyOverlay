@@ -1,5 +1,6 @@
 add_library(edcolony_core
     src/dummy.cpp
+    src/journal.cpp
 )
 
 target_include_directories(edcolony_core

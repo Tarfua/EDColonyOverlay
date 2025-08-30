@@ -13,7 +13,12 @@ int main() {
         (void)ev;
         // TODO: handle events later
     });
-    // Do not start yet; just verify linkage
+    tailer.start();
+    // Keep process alive until SIGINT (simplest loop for now)
+    std::cout << "tailing journals... press Ctrl+C to exit" << std::endl;
+    for (;;) {
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
     std::cout << "OK\n";
     return 0;
 }
