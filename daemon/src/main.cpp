@@ -11,6 +11,7 @@
 #include <asio/detached.hpp>
 #include "edcolony/net/sync.hpp"
 #include "edcolony/http_client.hpp"
+#include "edcolony/persistence.hpp"
 #include <csignal>
 #include <filesystem>
 
@@ -68,10 +69,19 @@ int main() {
                 break;
             case K::ColonisationConstructionDepot:
                 edcolony::handleDepot(ev.payload, state);
+                // persist any matching project (best-effort: by market id)
+                for (const auto& [id, p] : state.projectsById) {
+                    if (p.market_id == ev.payload.value("MarketID", 0)) {
+                        persistProject(storage, p);
+                    }
+                }
                 schedule_debounce(400);
                 break;
             case K::Market:
                 edcolony::handleMarket(ev.payload, state);
+                if (auto it = state.fcByMarketId.find(ev.payload.value("MarketID", 0)); it != state.fcByMarketId.end()) {
+                    persistFleetCarrier(storage, it->second);
+                }
                 schedule_debounce(400);
                 break;
             default:

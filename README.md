@@ -22,7 +22,7 @@ cmake --build build -j
 
 Запуск демона:
 ```bash
-./build/daemon/edcolony_daemon
+EDCOLONY_CMDR="Your CMDR" EDCOLONY_SVC_URI="http://localhost:8080" ./build/daemon/edcolony_daemon
 ```
 
 Конфіг через змінні середовища (за замовчуванням порожні):
