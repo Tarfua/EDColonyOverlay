@@ -1,6 +1,6 @@
 #pragma once
 
-#include "edcolony/models.hpp"
+#include "edcolony/domain/models.hpp"
 #include <unordered_map>
 
 namespace edcolony {
