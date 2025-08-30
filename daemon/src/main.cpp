@@ -7,6 +7,10 @@
 #include "edcolony/state.hpp"
 #include <asio/io_context.hpp>
 #include <asio/steady_timer.hpp>
+#include <asio/co_spawn.hpp>
+#include <asio/detached.hpp>
+#include "edcolony/net/sync.hpp"
+#include "edcolony/http_client.hpp"
 
 int main() {
     auto cfg = edcolony::loadConfigFromEnv();
@@ -37,10 +41,12 @@ int main() {
 
     asio::io_context io;
     asio::steady_timer debounce_timer(io);
+    edcolony::HttpClient http(io, cfg.service_uri.empty() ? std::string("http://localhost:8080") : cfg.service_uri,
+                               std::string("EDColonyDaemon/0.1"));
     auto schedule_debounce = [&](int ms){
         debounce_timer.expires_after(std::chrono::milliseconds(ms));
         debounce_timer.async_wait([&](const std::error_code&){
-            // TODO: fire network sync here
+            asio::co_spawn(io, edcolony::syncCmdrSnapshot(http, storage, state, std::string("CMDR")), asio::detached);
         });
     };
     edcolony::JournalTailer tailer(cfg.journal_dir, [&](const edcolony::JournalEvent& ev){

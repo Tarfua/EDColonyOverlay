@@ -4,6 +4,7 @@ add_library(edcolony_core
     src/http_client.cpp
     src/storage.cpp
     src/handlers.cpp
+    src/net_sync.cpp
 )
 
 target_include_directories(edcolony_core
