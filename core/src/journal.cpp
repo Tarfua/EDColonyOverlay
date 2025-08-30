@@ -4,6 +4,7 @@
 #include <fstream>
 #include <chrono>
 #include <thread>
+#include <nlohmann/json.hpp>
 
 namespace fs = std::filesystem;
 
@@ -56,8 +57,19 @@ void JournalTailer::start() {
                         while (std::getline(in, line)) {
                             if (!line.empty() && line.back() == '\r') line.pop_back();
                             JournalEvent ev;
-                            ev.raw_json_line = std::move(line);
-                            // kind left Unknown for now; JSON parser will set it later
+                            ev.raw_json_line = line;
+                            try {
+                                ev.payload = nlohmann::json::parse(line);
+                                auto evt = ev.payload.value("event", std::string());
+                                if (evt == "Docked") ev.kind = JournalEventKind::Docked;
+                                else if (evt == "ColonisationConstructionDepot") ev.kind = JournalEventKind::ColonisationConstructionDepot;
+                                else if (evt == "Market") ev.kind = JournalEventKind::Market;
+                                else if (evt == "FSDJump") ev.kind = JournalEventKind::FSDJump;
+                                else if (evt == "Location") ev.kind = JournalEventKind::Location;
+                                else ev.kind = JournalEventKind::Unknown;
+                            } catch (...) {
+                                ev.kind = JournalEventKind::Unknown;
+                            }
                             if (callback_) callback_(ev);
                         }
                         last_size = static_cast<std::uintmax_t>(in.tellg());

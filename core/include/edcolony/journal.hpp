@@ -6,6 +6,7 @@
 #include <memory>
 #include <thread>
 #include <atomic>
+#include <nlohmann/json.hpp>
 
 namespace edcolony {
 
@@ -22,6 +23,7 @@ enum class JournalEventKind {
 struct JournalEvent {
     JournalEventKind kind {JournalEventKind::Unknown};
     std::string raw_json_line;
+    nlohmann::json payload; // parsed JSON
 };
 
 using JournalCallback = std::function<void(const JournalEvent&)>;
