@@ -1,12 +1,12 @@
 #include <iostream>
 #include <cstdlib>
+#include "edcolony/config.hpp"
 
 int main() {
-    const char* svc = std::getenv("EDCOLONY_SVC_URI");
-    const char* jdir = std::getenv("EDCOLONY_JOURNAL_DIR");
+    auto cfg = edcolony::loadConfigFromEnv();
     std::cout << "EDColony daemon starting...\n";
-    std::cout << "svc_uri=" << (svc ? svc : "") << "\n";
-    std::cout << "journal_dir=" << (jdir ? jdir : "") << "\n";
+    std::cout << "svc_uri=" << cfg.service_uri << "\n";
+    std::cout << "journal_dir=" << cfg.journal_dir << "\n";
     std::cout << "OK\n";
     return 0;
 }

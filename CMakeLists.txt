@@ -12,6 +12,33 @@ endif()
 
 include(GNUInstallDirs)
 
+# Dependencies via FetchContent
+include(FetchContent)
+
+# nlohmann/json
+FetchContent_Declare(
+    nlohmann_json
+    GIT_REPOSITORY https://github.com/nlohmann/json.git
+    GIT_TAG v3.11.3
+)
+FetchContent_MakeAvailable(nlohmann_json)
+
+# asio (standalone)
+FetchContent_Declare(
+    asio
+    GIT_REPOSITORY https://github.com/chriskohlhoff/asio.git
+    GIT_TAG asio-1-30-2
+)
+FetchContent_MakeAvailable(asio)
+
+# spdlog (header-only for now)
+FetchContent_Declare(
+    spdlog
+    GIT_REPOSITORY https://github.com/gabime/spdlog.git
+    GIT_TAG v1.13.0
+)
+FetchContent_MakeAvailable(spdlog)
+
 if(MSVC)
     add_compile_options(/W4)
 else()
