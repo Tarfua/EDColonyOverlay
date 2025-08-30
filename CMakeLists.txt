@@ -39,6 +39,8 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(spdlog)
 
+find_package(Threads REQUIRED)
+
 if(MSVC)
     add_compile_options(/W4)
 else()
