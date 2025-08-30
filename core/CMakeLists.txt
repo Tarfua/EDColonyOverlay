@@ -3,6 +3,7 @@ add_library(edcolony_core
     src/journal.cpp
     src/http_client.cpp
     src/storage.cpp
+    src/handlers.cpp
 )
 
 target_include_directories(edcolony_core

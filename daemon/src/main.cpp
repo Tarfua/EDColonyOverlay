@@ -3,6 +3,8 @@
 #include "edcolony/config.hpp"
 #include "edcolony/journal.hpp"
 #include "edcolony/storage.hpp"
+#include "edcolony/handlers.hpp"
+#include "edcolony/state.hpp"
 
 int main() {
     auto cfg = edcolony::loadConfigFromEnv();
@@ -22,19 +24,18 @@ int main() {
         }
     }
 
-    edcolony::JournalTailer tailer(cfg.journal_dir, [](const edcolony::JournalEvent& ev){
+    edcolony::ColonyState state;
+    edcolony::JournalTailer tailer(cfg.journal_dir, [&state](const edcolony::JournalEvent& ev){
         using K = edcolony::JournalEventKind;
         switch (ev.kind) {
             case K::Docked:
-                std::cout << "Docked: Station=" << ev.payload.value("StationName", "")
-                          << " MarketID=" << ev.payload.value("MarketID", 0)
-                          << " SystemAddress=" << ev.payload.value("SystemAddress", 0) << "\n";
+                edcolony::handleDocked(ev.payload, state);
                 break;
             case K::ColonisationConstructionDepot:
-                std::cout << "Depot: MarketID=" << ev.payload.value("MarketID", 0) << "\n";
+                edcolony::handleDepot(ev.payload, state);
                 break;
             case K::Market:
-                std::cout << "Market: MarketID=" << ev.payload.value("MarketID", 0) << "\n";
+                edcolony::handleMarket(ev.payload, state);
                 break;
             default:
                 break;
