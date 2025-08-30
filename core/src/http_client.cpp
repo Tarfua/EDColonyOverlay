@@ -155,6 +155,40 @@ awaitable<int> HttpClient::postProjectUpdate(const std::string& build_id, const 
     co_return 0;
 }
 
+awaitable<int> HttpClient::postProjectContribute(const std::string& build_id, const std::string& cmdr, const std::string& json_body) {
+    tcp::resolver resolver(io_context_);
+    tcp::socket socket(io_context_);
+    auto endpoints = co_await resolver.async_resolve(host_, port_, use_awaitable);
+    co_await asio::async_connect(socket, endpoints, use_awaitable);
+
+    std::string path = api_prefix_ + "/project/" + build_id + "/contribute/" + cmdr;
+    std::string req;
+    req += "POST " + path + " HTTP/1.1\r\n";
+    req += "Host: " + host_ + "\r\n";
+    req += "User-Agent: " + user_agent_ + "\r\n";
+    req += "Accept: application/json\r\n";
+    req += "Content-Type: application/json\r\n";
+    req += "Content-Length: " + std::to_string(json_body.size()) + "\r\n";
+    req += "Connection: close\r\n\r\n";
+    req += json_body;
+    co_await asio::async_write(socket, asio::buffer(req), use_awaitable);
+
+    asio::streambuf response;
+    co_await asio::async_read_until(socket, response, "\r\n\r\n", use_awaitable);
+    std::istream rs(&response);
+    std::string status_line;
+    std::getline(rs, status_line);
+    if (status_line.size() >= 12) {
+        int code = std::atoi(status_line.substr(9, 3).c_str());
+        co_return code;
+    }
+    co_return 0;
+}
+
+awaitable<std::string> HttpClient::getProject(const std::string& build_id) {
+    co_return co_await httpGet(api_prefix_ + "/project/" + build_id);
+}
+
 }
 
 

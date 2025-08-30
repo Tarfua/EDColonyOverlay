@@ -24,6 +24,12 @@ public:
     // POST /api/project/{buildId} (update)
     asio::awaitable<int> postProjectUpdate(const std::string& build_id, const std::string& json_body);
 
+    // POST /api/project/{buildId}/contribute/{cmdr}
+    asio::awaitable<int> postProjectContribute(const std::string& build_id, const std::string& cmdr, const std::string& json_body);
+
+    // GET /api/project/{buildId}
+    asio::awaitable<std::string> getProject(const std::string& build_id);
+
 private:
     asio::io_context& io_context_;
     std::string base_uri_;
